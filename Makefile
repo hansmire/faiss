@@ -87,12 +87,11 @@ java/swigfaiss_wrap.cxx: swigfaiss.swig $(HFILES)
 	# We have to have a custom patch to avoid problems with the finalize method
 	patch -p0 < RangeSearchPartialResult.patch
 
-# extension is .so even on the mac
-java/_swigfaiss.so: java/swigfaiss_wrap.cxx libfaiss.a
+java/libswigfaiss.$(SHAREDEXT): java/swigfaiss_wrap.cxx libfaiss.a
 	$(CXX) -I. $(CXXFLAGS) $(LDFLAGS) $(JAVACFLAGS) $(SHAREDFLAGS) \
 	-o $@ $^ $(BLASLDFLAGSSO)
 
-java/swigfaiss.java: java/_swigfaiss.so
+java/swigfaiss.java: java/swigfaiss_wrap.cxx
 
 java/swigfaiss.class: java/swigfaiss.java
 	javac java/*java
@@ -104,7 +103,7 @@ com/facebook/research/faiss/swigfaiss.class: java/swigfaiss.class
 java/faiss.jar: com/facebook/research/faiss/swigfaiss.class
 	jar -cvf java/faiss.jar com/facebook/research/faiss/*.class
 
-java: java/faiss.jar java/_swigfaiss.so
+java: java/faiss.jar java/libswigfaiss.$(SHAREDEXT)
 
 # extension is .so even on the mac
 python/_swigfaiss.so: python/swigfaiss_wrap.cxx libfaiss.a
@@ -196,6 +195,7 @@ clean:
 	   	lua/swigfaiss.so lua/swigfaiss_wrap.cxx \
 		python/_swigfaiss.so python/swigfaiss_wrap.cxx \
 		python/swigfaiss.py _swigfaiss.so swigfaiss.py
+	rm -rf java com
 
 .env_ok:
 ifeq ($(wildcard $(MAKEFILE_INC)),)
