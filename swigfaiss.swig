@@ -21,6 +21,11 @@
 %module swigfaiss;
 #endif
 
+%include cpointer.i
+%pointer_functions(float, floatp);
+%include "carrays.i"
+%array_functions(float, floatArray);
+
 #pragma SWIG nowarn=321
 #pragma SWIG nowarn=403
 #pragma SWIG nowarn=325
@@ -412,6 +417,42 @@ struct AsyncIndexSearchC {
 %define DOWNCAST_GPU(subclass)
     if (dynamic_cast<faiss::gpu::subclass *> ($1)) {
       $result = SWIG_NewPointerObj($1,SWIGTYPE_p_faiss__gpu__ ## subclass,$owner);
+    } else
+%enddef
+
+#endif
+
+#ifdef SWIGJAVA
+
+%define DOWNCAST(subclass)
+    if (dynamic_cast<faiss::subclass *> ($1)) {
+      jclass clazz = jenv->FindClass("subclass");
+      if (clazz) {
+        jmethodID mid = jenv->GetMethodID(clazz, "<init>", "(JZ)V");
+        if (mid) {
+          jlong cptr = 0;
+          faiss::subclass *tempResult = dynamic_cast<faiss::subclass *> ($1);
+          *(faiss::subclass **)cptr = tempResult; 
+          jobject tempPointer = jenv->NewObject(clazz, mid, cptr, false);
+          $result = (jlong)&tempPointer;
+        }
+      }
+    } else
+%enddef
+
+%define DOWNCAST_GPU(subclass)
+    if (dynamic_cast<faiss::gpu::subclass *> ($1)) {
+      jclass clazz = jenv->FindClass("subclass");
+      if (clazz) {
+        jmethodID mid = jenv->GetMethodID(clazz, "<init>", "(JZ)V");
+        if (mid) {
+          jlong cptr = 0;
+          faiss::subclass *tempResult = dynamic_cast<faiss::subclass *> ($1);
+          *(faiss::gpu::subclass **)cptr = tempResult; 
+          jobject tempPointer = jenv->NewObject(clazz, mid, cptr, false);
+          $result = (jlong)&tempPointer;
+        }
+      }
     } else
 %enddef
 

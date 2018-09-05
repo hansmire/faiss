@@ -81,6 +81,30 @@ HFILES = IndexFlat.h Index.h IndexLSH.h IndexPQ.h IndexIVF.h \
 python/swigfaiss_wrap.cxx: swigfaiss.swig $(HFILES)
 	$(SWIGEXEC) -python -c++ -Doverride= -o $@ $<
 
+java/swigfaiss_wrap.cxx: swigfaiss.swig $(HFILES)
+	mkdir -p java
+	$(SWIGEXEC) -java -package com.facebook.research.faiss -c++ -Doverride= -o $@ $<
+	# We have to have a custom patch to avoid problems with the finalize method
+	patch -p0 < RangeSearchPartialResult.patch
+
+# extension is .so even on the mac
+java/_swigfaiss.so: java/swigfaiss_wrap.cxx libfaiss.a
+	$(CXX) -I. $(CXXFLAGS) $(LDFLAGS) $(JAVACFLAGS) $(SHAREDFLAGS) \
+	-o $@ $^ $(BLASLDFLAGSSO)
+
+java/swigfaiss.java: java/_swigfaiss.so
+
+java/swigfaiss.class: java/swigfaiss.java
+	javac java/*java
+
+com/facebook/research/faiss/swigfaiss.class: java/swigfaiss.class
+	mkdir -p com/facebook/research/faiss
+	cp java/*.class com/facebook/research/faiss
+
+java/faiss.jar: com/facebook/research/faiss/swigfaiss.class
+	jar -cvf java/faiss.jar com/facebook/research/faiss/*.class
+
+java: java/faiss.jar java/_swigfaiss.so
 
 # extension is .so even on the mac
 python/_swigfaiss.so: python/swigfaiss_wrap.cxx libfaiss.a

@@ -3,6 +3,8 @@
 /c_api/gpu/bin/
 /makefile.inc
 /tests/demo_ivfpq_indexing
+/com
+/java
 *.swp
 *.swo
 *.o
