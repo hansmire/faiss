@@ -92,6 +92,9 @@ NUMPY_INC=$(shell python -c "import numpy ; print(numpy.get_include())")
 PYTHONCFLAGS=-I${PYTHON_INC} -I${NUMPY_INC}
 PYTHONLIB=-lpython
 
+JAVA_HOME=$(shell /usr/libexec/java_home)
+JAVACFLAGS=-I"${JAVA_HOME}/include" -I"${JAVA_HOME}/include/darwin"
+
 ##########################################################################
 # Faiss GPU
 ##########################################################################

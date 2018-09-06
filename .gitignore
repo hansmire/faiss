@@ -16,3 +16,7 @@
 /c_api/gpu/bin/
 /tests/test
 /tests/gtest/
+/java/com
+/java/*.java
+/java/faiss.jar
+/java/swigfaiss_wrap.cpp
